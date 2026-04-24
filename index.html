@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>스레드 소설 에디터</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <h1>🧵 스레드 소설 에디터</h1>
+  <div class="header-btns">
+    <button class="header-btn" onclick="exportFile()">📤<span class="btn-label"> 파일 저장</span></button>
+    <button class="header-btn" onclick="document.getElementById('importInput').click()">📥<span class="btn-label"> 파일 불러오기</span></button>
+    <button class="header-btn danger-h" onclick="clearAll()">🗑<span class="btn-label"> 전체 삭제</span></button>
+    <input type="file" id="importInput" accept=".json" style="display:none" onchange="importFile(this)">
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- 설정 -->
+  <div class="settings-bar">
+    <div>
+      <label>스레드 제목</label>
+      <input id="threadTitle" value="【소설】 제목을 입력하세요" oninput="saveLocal()">
+    </div>
+    <div>
+      <label>기본 닉네임</label>
+      <input id="defaultName" value="" oninput="saveLocal()">
+    </div>
+    <div style="grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding-top:8px;border-top:1px solid var(--border);">
+      <label style="font-size:11px;color:var(--text2);font-weight:500;margin:0;">날짜</label>
+      <div id="dateModeRow" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;flex:1;">
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;margin:0;font-size:12px;color:var(--text2);">
+          <input type="radio" name="dateMode" value="none" onchange="onDateModeChange()" style="accent-color:var(--accent)"> 표시 안함
+        </label>
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;margin:0;font-size:12px;color:var(--text2);">
+          <input type="radio" name="dateMode" value="auto" checked onchange="onDateModeChange()" style="accent-color:var(--accent)"> 자동 (현재 시간)
+        </label>
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;margin:0;font-size:12px;color:var(--text2);">
+          <input type="radio" name="dateMode" value="fixed" onchange="onDateModeChange()" style="accent-color:var(--accent)"> 고정값
+        </label>
+        <span id="dateFormatWrap" style="display:flex;align-items:center;gap:5px;">
+          <select id="dateFormat" onchange="saveLocal()" style="font-size:12px;padding:3px 6px;border-radius:4px;border:1px solid var(--border);background:#fff;color:var(--text);font-family:var(--font);">
+            <option value="2ch">2ch식 (YYYY/MM/DD(요일) HH:mm:ss)</option>
+            <option value="short">단순 (YYYY-MM-DD HH:mm)</option>
+            <option value="time">시간만 (HH:mm)</option>
+          </select>
+        </span>
+        <span id="dateFixedWrap" style="display:none;align-items:center;gap:5px;">
+          <input id="dateFixed" type="text" placeholder="예) 20XX/03/24 12:00" oninput="saveLocal()"
+            style="font-size:12px;padding:4px 8px;border-radius:4px;border:1px solid var(--border);background:#fff;color:var(--text);font-family:var(--mono);width:220px;">
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 고정닉 -->
+  <div class="nick-panel">
+    <div class="nick-panel-header">
+      <h2>📋 고정닉 목록</h2>
+      <span>항목 클릭 시 이름 입력란에 자동 입력</span>
+    </div>
+    <div class="nick-add-row">
+      <input id="addNickName" placeholder="닉네임" onkeydown="if(event.key==='Enter')addNick()">
+      <input id="addNickMemo" class="memo" placeholder="메모 (역할, 설명 등)" onkeydown="if(event.key==='Enter')addNick()">
+      <button onclick="addNick()" class="primary">추가</button>
+    </div>
+    <div class="nick-list" id="nickList">
+      <div class="nick-empty">닉네임을 추가해보세요</div>
+    </div>
+  </div>
+
+  <!-- 탭 -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('editor', this)">✍️ 편집</button>
+    <button class="tab" onclick="switchTab('preview', this)">👁 미리보기</button>
+    <button class="tab" onclick="switchTab('export', this)">📤 내보내기</button>
+  </div>
+
+  <!-- 편집 -->
+  <div id="panel-editor" class="panel active">
+    <div class="post-form">
+      <div class="nick-hint" id="nickHint"></div>
+      <div class="post-form-row">
+        <label>이름</label>
+        <input id="newName" placeholder="이름 (비워두면 기본값)" style="max-width:210px">
+        <label style="min-width:30px">날짜</label>
+        <input id="newDate" placeholder="자동 생성">
+      </div>
+      <textarea id="newContent" placeholder="레스 내용을 입력하세요... (Ctrl+Enter로 추가)" oninput="updateCharCount()"></textarea>
+      <div class="post-form-footer">
+        <span class="char-count" id="charCount">0자</span>
+        <button onclick="addPost()" class="primary">레스 추가 ↵</button>
+      </div>
+    </div>
+    <div id="postList"></div>
+  </div>
+
+  <!-- 미리보기 -->
+  <div id="panel-preview" class="panel">
+    <div class="preview-board">
+      <div class="preview-title" id="previewTitle"></div>
+      <div id="previewList"></div>
+    </div>
+  </div>
+
+  <!-- 내보내기 -->
+  <div id="panel-export" class="panel">
+    <div class="export-options">
+      <label><input type="radio" name="fmt" value="2ch" checked onchange="renderExport()"> 2ch 스타일</label>
+      <label><input type="radio" name="fmt" value="plain" onchange="renderExport()"> 일반 텍스트</label>
+      <button onclick="copyExport()" class="accent" style="margin-left:auto">📋 복사</button>
+    </div>
+    <textarea class="export-output" id="exportOutput" readonly></textarea>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
