@@ -17,7 +17,7 @@
   --accent-hover: #1e3570;
   --danger: #c00;
   --radius: 6px;
-  --font: 'Noto Sans KR', sans-serif;
+  --font: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
   --mono: 'MS Gothic', 'Meiryo', 'Hiragino Kaku Gothic Pro', monospace;
 }
 
@@ -266,6 +266,7 @@ button.header-btn.danger-h:hover { background: rgba(200,0,0,0.2); }
   .header-btns { gap: 4px; }
   .settings-bar { grid-template-columns: 1fr; }
   #dateModeRow { flex-wrap: wrap !important; gap: 8px !important; }
+  #dateModeRow label { white-space: nowrap; }
   #dateFormatWrap, #dateFixedWrap { width: 100%; }
   #dateFixed { width: 100% !important; }
   .nick-add-row { flex-wrap: wrap; }
@@ -278,6 +279,7 @@ button.header-btn.danger-h:hover { background: rgba(200,0,0,0.2); }
   .post-form { padding: 10px; }
   .post-form-row { flex-wrap: wrap; }
   .post-form-row label { width: auto; min-width: unset; }
+  .post-form-row input { width: 100%; flex: unset; }
   .post-form-footer { flex-direction: column; align-items: stretch; gap: 6px; }
   .post-form-footer button { width: 100%; padding: 10px; }
   .post-header-actions { width: 100%; justify-content: flex-end; margin-top: 3px; }
