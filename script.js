@@ -348,6 +348,36 @@ function renderExport() {
   document.getElementById('exportOutput').value = out;
 }
 
+// ── PNG 저장 ──────────────────────────────────────────
+function exportPng() {
+  if (!posts.length) { showToast('레스가 없습니다'); return; }
+ 
+  // 미리보기 렌더링 후 캡처
+  renderPreview();
+ 
+  const board = document.querySelector('.preview-board');
+  const title = document.getElementById('threadTitle').value.replace(/[\\/:*?"<>|]/g, '_').slice(0, 40) || '스레드';
+ 
+  showToast('PNG 생성 중...');
+ 
+  html2canvas(board, {
+    backgroundColor: '#e8e8df',
+    scale: 2,           // 고해상도
+    useCORS: true,
+    scrollY: 0,
+    windowWidth: board.scrollWidth,
+    height: board.scrollHeight,
+  }).then(canvas => {
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = title + '.png';
+    a.click();
+    showToast('PNG 저장 완료!');
+  }).catch(() => {
+    showToast('PNG 생성에 실패했습니다');
+  });
+}
+
 function copyExport() {
   const el = document.getElementById('exportOutput');
   if (!el.value) { showToast('내보낼 내용이 없습니다'); return; }

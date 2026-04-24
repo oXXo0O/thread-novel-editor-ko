@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>스레 형식 소설 에디터</title>
   <link rel="stylesheet" href="style.css">
+  <!-- PNG 캡처 라이브러리 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -129,6 +131,7 @@
       <label><input type="radio" name="fmt" value="2ch" checked onchange="renderExport()"> 2ch 스타일</label>
       <label><input type="radio" name="fmt" value="plain" onchange="renderExport()"> 일반 텍스트</label>
       <button onclick="copyExport()" class="accent" style="margin-left:auto">복사</button>
+      <button onclick="exportPng()" class="primary">PNG 저장</button>
     </div>
     <textarea class="export-output" id="exportOutput" readonly></textarea>
   </div>
