@@ -355,9 +355,9 @@ function exportPng() {
   const title = document.getElementById('threadTitle').value.replace(/[\/:*?"<>|]/g, '_').slice(0, 40) || '스레드';
   const threadTitle = document.getElementById('threadTitle').value;
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  const SCALE = 2;
-  const WIDTH = 680;
-  const PADDING = 16;
+  const SCALE = 3;
+  const WIDTH = 390;
+  const PADDING = 12;
   const BG = '#e8e8df';
   const POST_BG = '#ffffff';
   const HEADER_BG = '#e8e0d0';
@@ -375,7 +375,7 @@ function exportPng() {
       const ctx = canvas.getContext('2d');
  
       // 폰트 설정
-      const fontBase = "'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
+      const fontBase = "'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif";
       const monoBase = "'MS Gothic', 'Meiryo', monospace";
  
       // 높이 계산 (먼저 dry-run)
@@ -396,22 +396,29 @@ function exportPng() {
       }
  
       function wrapText(ctx, text, maxWidth, fontSize) {
-        ctx.font = `${fontSize}px ${monoBase}`;
-        const paragraphs = text.split('');
+        function cw(ch) {
+          const code = ch.charCodeAt(0);
+          if (
+            (code >= 0xAC00 && code <= 0xD7A3) ||
+            (code >= 0x3040 && code <= 0x30FF) ||
+            (code >= 0x4E00 && code <= 0x9FFF) ||
+            (code >= 0xFF00 && code <= 0xFFEF)
+          ) return fontSize;
+          return fontSize * 0.6;
+        }
+        function lw(str) { let w = 0; for (const ch of str) w += cw(ch); return w; }
+        const paragraphs = text.split('\n');
         const result = [];
         paragraphs.forEach(para => {
           if (para === '') { result.push(''); return; }
           let line = '';
-          for (let i = 0; i < para.length; i++) {
-            const testLine = line + para[i];
-            if (ctx.measureText(testLine).width > maxWidth && line !== '') {
-              result.push(line);
-              line = para[i];
-            } else {
-              line = testLine;
-            }
+          for (const ch of para) {
+            const test = line + ch;
+            if (lw(test) > maxWidth && line !== '') {
+              result.push(line); line = ch;
+            } else { line = test; }
           }
-          result.push(line);
+          if (line !== '') result.push(line);
         });
         return result;
       }
