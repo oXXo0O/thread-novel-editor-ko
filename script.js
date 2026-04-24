@@ -138,7 +138,7 @@ function getDefaultDate() {
   const now = new Date();
   const days = ['일', '월', '화', '수', '목', '금', '토'];
   const pad = n => String(n).padStart(2, '0');
-  if (fmt === '2ch') {
+  if (fmt === 'channel') {
     return `${now.getFullYear()}/${pad(now.getMonth() + 1)}/${pad(now.getDate())}(${days[now.getDay()]}) ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
   } else if (fmt === 'short') {
     return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
@@ -311,6 +311,22 @@ function renderEditor() {
         : `<div class="post-body">${esc(p.content)}</div>`}
     </div>
   `).join('');
+
+  // 1000 마감 멘트
+  const startNum = getStartNum();
+  const endMsg = getEndMsg();
+  if (endMsg !== null && (startNum + posts.length - 1) >= 1000) {
+    const endItem = document.createElement('div');
+    endItem.className = 'post-item';
+    endItem.style.opacity = '0.7';
+    endItem.innerHTML = `
+      <div class="post-header">
+        <span class="post-num">${startNum + posts.length}</span>
+        <span class="post-name" style="color:var(--text2)">${esc(endMsg.name)}</span>
+      </div>
+      <div class="post-body" style="color:var(--text2);white-space:pre-wrap;">${esc(endMsg.text)}</div>`;
+    list.appendChild(endItem);
+  }
 }
 
 function renderPreview() {
@@ -328,23 +344,45 @@ function renderPreview() {
       <div class="preview-post-body">${esc(p.content)}</div>
     </div>
   `).join('');
+
+  // 미리보기 1000 마감 멘트
+  const pvStartNum = getStartNum();
+  const pvEndMsg = getEndMsg();
+  if (pvEndMsg !== null && (pvStartNum + posts.length - 1) >= 1000) {
+    const endItem = document.createElement('div');
+    endItem.className = 'preview-post';
+    endItem.innerHTML =
+      '<div class="preview-post-header">' +
+      '<span class="pnum">' + (pvStartNum + posts.length) + '</span>：' +
+      '<span class="pname" style="color:#888">' + esc(pvEndMsg.name) + '</span></div>' +
+      '<div class="preview-post-body" style="color:#888;white-space:pre-wrap;">' + esc(pvEndMsg.text) + '</div>';
+    list.appendChild(endItem);
+  }
 }
 
 function renderExport() {
-  const fmt = document.querySelector('input[name="fmt"]:checked')?.value || '2ch';
+  const fmt = document.querySelector('input[name="fmt"]:checked')?.value || 'channel';
   const title = document.getElementById('threadTitle').value;
   let out = '';
-  if (fmt === '2ch') {
+  const expStartNum = getStartNum();
+  const expEndMsg = getEndMsg();
+  const showExpEnd = expEndMsg !== null && (expStartNum + posts.length - 1) >= 1000;
+  const expEndNum = expStartNum + posts.length;
+ 
+  if (fmt === 'channel') {
     out = title + '\n\n' + posts.map((p, i) => {
-      const start = getStartNum();
-      const header = p.date ? `${start + i} ：${p.name} ：${p.date}` : `${start + i} ：${p.name}`;
+      const header = p.date ? `${expStartNum + i} ：${p.name} ：${p.date}` : `${expStartNum + i} ：${p.name}`;
       return `${header}\n${p.content}`;
     }).join('\n\n');
+    // 내보내기 1000 마감 멘트
+    if (showExpEnd) out += `\n\n${expEndNum} ：${expEndMsg.name}\n${expEndMsg.text}`;
   } else {
     out = title + '\n' + '─'.repeat(40) + '\n\n' + posts.map((p, i) => {
-      const header = p.date ? `[${getStartNum() + i}] ${p.name} ${p.date}` : `[${getStartNum() + i}] ${p.name}`;
+      const header = p.date ? `[${expStartNum + i}] ${p.name} ${p.date}` : `[${expStartNum + i}] ${p.name}`;
       return `${header}\n${p.content}`;
     }).join('\n\n');
+    // 내보내기 1000 마감 멘트
+    if (showExpEnd) out += `\n\n[${expEndNum}] ${expEndMsg.name}\n${expEndMsg.text}`;
   }
   document.getElementById('exportOutput').value = out;
 }
@@ -579,6 +617,34 @@ function importFile(input) {
   };
   reader.readAsText(file, 'UTF-8');
   input.value = '';
+}
+
+// 1000 마감 멘트 토글
+function toggleEndMsg() {
+  const body = document.getElementById('endMsgBody');
+  const icon = document.getElementById('endMsgToggleIcon');
+  const isHidden = body.style.visibility === 'hidden';
+  if (isHidden) {
+    body.style.visibility = 'visible';
+    body.style.height = 'auto';
+    body.style.marginTop = '8px';
+    icon.textContent = '▲';
+  } else {
+    body.style.visibility = 'hidden';
+    body.style.height = '0';
+    body.style.overflow = 'hidden';
+    body.style.marginTop = '0';
+    icon.textContent = '▼';
+  }
+}
+ 
+function getEndMsg() {
+  const enabled = document.getElementById('endMsgEnabled')?.checked;
+  if (!enabled) return null;
+  return {
+    name: document.getElementById('endMsgName')?.value.trim() || 'Over 1000',
+    text: document.getElementById('endMsgText')?.value || '',
+  };
 }
 
 // 시작 번호
