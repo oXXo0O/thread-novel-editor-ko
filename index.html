@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>스레드 소설 에디터</title>
+  <title>스레 형식 소설 에디터</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <header class="site-header">
-  <h1>🧵 스레드 소설 에디터</h1>
+  <h1>🧵 스레 형식 소설 에디터</h1>
   <div class="header-btns">
     <button class="header-btn" onclick="exportFile()">📤<span class="btn-label"> 파일 저장</span></button>
     <button class="header-btn" onclick="document.getElementById('importInput').click()">📥<span class="btn-label"> 파일 불러오기</span></button>
@@ -50,7 +50,7 @@
           </select>
         </span>
         <span id="dateFixedWrap" style="display:none;align-items:center;gap:5px;">
-          <input id="dateFixed" type="text" placeholder="예) 20XX/03/24 12:00" oninput="saveLocal()"
+          <input id="dateFixed" type="text" placeholder="예) 20XX/XX/XX" oninput="saveLocal()"
             style="font-size:12px;padding:4px 8px;border-radius:4px;border:1px solid var(--border);background:#fff;color:var(--text);font-family:var(--mono);width:220px;">
         </span>
       </div>
