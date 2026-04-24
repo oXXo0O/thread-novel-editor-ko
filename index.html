@@ -9,7 +9,7 @@
 <body>
 
 <header class="site-header">
-  <h1>🧵 스레 형식 소설 에디터</h1>
+  <h1> 스레 형식 소설 에디터</h1>
   <div class="header-btns">
     <button class="header-btn" onclick="exportFile()">📤<span class="btn-label"> 파일 저장</span></button>
     <button class="header-btn" onclick="document.getElementById('importInput').click()">📥<span class="btn-label"> 파일 불러오기</span></button>
@@ -24,7 +24,7 @@
   <div class="settings-bar">
     <div>
       <label>스레드 제목</label>
-      <input id="threadTitle" value="【소설】 제목을 입력하세요" oninput="saveLocal()">
+      <input id="threadTitle" value="【스레】 제목을 입력하세요" oninput="saveLocal()">
     </div>
     <div>
       <label>기본 닉네임</label>
@@ -60,7 +60,7 @@
   <!-- 고정닉 -->
   <div class="nick-panel">
     <div class="nick-panel-header">
-      <h2>📋 고정닉 목록</h2>
+      <h2>고정닉 목록</h2>
       <span>항목 클릭 시 이름 입력란에 자동 입력</span>
     </div>
     <div class="nick-add-row">
@@ -75,9 +75,9 @@
 
   <!-- 탭 -->
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('editor', this)">✍️ 편집</button>
-    <button class="tab" onclick="switchTab('preview', this)">👁 미리보기</button>
-    <button class="tab" onclick="switchTab('export', this)">📤 내보내기</button>
+    <button class="tab active" onclick="switchTab('editor', this)">편집</button>
+    <button class="tab" onclick="switchTab('preview', this)">미리보기</button>
+    <button class="tab" onclick="switchTab('export', this)">내보내기</button>
   </div>
 
   <!-- 편집 -->
@@ -86,7 +86,7 @@
     <!-- 기호 팔레트 -->
     <div class="symbol-palette" id="symbolPalette">
       <div class="symbol-palette-header" onclick="togglePalette()">
-        <span>🔣 특수기호</span>
+        <span>특수기호</span>
         <span class="symbol-toggle-icon" id="symbolToggleIcon">▲</span>
       </div>
       <div class="symbol-palette-body" id="symbolPaletteBody">
@@ -128,7 +128,7 @@
     <div class="export-options">
       <label><input type="radio" name="fmt" value="2ch" checked onchange="renderExport()"> 2ch 스타일</label>
       <label><input type="radio" name="fmt" value="plain" onchange="renderExport()"> 일반 텍스트</label>
-      <button onclick="copyExport()" class="accent" style="margin-left:auto">📋 복사</button>
+      <button onclick="copyExport()" class="accent" style="margin-left:auto">복사</button>
     </div>
     <textarea class="export-output" id="exportOutput" readonly></textarea>
   </div>
