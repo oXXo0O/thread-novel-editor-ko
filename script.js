@@ -352,30 +352,174 @@ function renderExport() {
 function exportPng() {
   if (!posts.length) { showToast('레스가 없습니다'); return; }
  
-  // 미리보기 렌더링 후 캡처
-  renderPreview();
- 
-  const board = document.querySelector('.preview-board');
-  const title = document.getElementById('threadTitle').value.replace(/[\\/:*?"<>|]/g, '_').slice(0, 40) || '스레드';
+  const title = document.getElementById('threadTitle').value.replace(/[\/:*?"<>|]/g, '_').slice(0, 40) || '스레드';
+  const threadTitle = document.getElementById('threadTitle').value;
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const SCALE = 2;
+  const WIDTH = 680;
+  const PADDING = 16;
+  const BG = '#e8e8df';
+  const POST_BG = '#ffffff';
+  const HEADER_BG = '#e8e0d0';
+  const TITLE_BG = '#8b0000';
+  const BORDER = '#cccccc';
+  const RED = '#8b0000';
+  const BLUE = '#00008b';
+  const GRAY = '#666666';
  
   showToast('PNG 생성 중...');
  
-  html2canvas(board, {
-    backgroundColor: '#e8e8df',
-    scale: 2,           // 고해상도
-    useCORS: true,
-    scrollY: 0,
-    windowWidth: board.scrollWidth,
-    height: board.scrollHeight,
-  }).then(canvas => {
-    const a = document.createElement('a');
-    a.href = canvas.toDataURL('image/png');
-    a.download = title + '.png';
-    a.click();
-    showToast('PNG 저장 완료!');
-  }).catch(() => {
-    showToast('PNG 생성에 실패했습니다');
-  });
+  setTimeout(() => {
+    try {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+ 
+      // 폰트 설정
+      const fontBase = "'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
+      const monoBase = "'MS Gothic', 'Meiryo', monospace";
+ 
+      // 높이 계산 (먼저 dry-run)
+      function measureHeight() {
+        let y = PADDING;
+        // 제목
+        y += 34; // title bar
+        y += 8;
+        posts.forEach((p, i) => {
+          y += 26; // header
+          // 본문 줄 수 계산
+          const lines = wrapText(ctx, p.content, WIDTH - PADDING * 2 - 24, 13);
+          y += lines.length * 22 + 14;
+          y += 6;
+        });
+        y += PADDING;
+        return y;
+      }
+ 
+      function wrapText(ctx, text, maxWidth, fontSize) {
+        ctx.font = `${fontSize}px ${monoBase}`;
+        const paragraphs = text.split('');
+        const result = [];
+        paragraphs.forEach(para => {
+          if (para === '') { result.push(''); return; }
+          let line = '';
+          for (let i = 0; i < para.length; i++) {
+            const testLine = line + para[i];
+            if (ctx.measureText(testLine).width > maxWidth && line !== '') {
+              result.push(line);
+              line = para[i];
+            } else {
+              line = testLine;
+            }
+          }
+          result.push(line);
+        });
+        return result;
+      }
+ 
+      // 임시 canvas로 높이 측정
+      const tempCanvas = document.createElement('canvas');
+      const tempCtx = tempCanvas.getContext('2d');
+      tempCanvas.width = WIDTH * SCALE;
+      const totalHeight = measureHeight.call({ ctx: tempCtx });
+ 
+      canvas.width = WIDTH * SCALE;
+      canvas.height = totalHeight * SCALE;
+      ctx.scale(SCALE, SCALE);
+ 
+      // 배경
+      ctx.fillStyle = BG;
+      ctx.fillRect(0, 0, WIDTH, totalHeight);
+ 
+      let y = PADDING;
+ 
+      // 스레드 제목 바
+      ctx.fillStyle = TITLE_BG;
+      ctx.fillRect(PADDING, y, WIDTH - PADDING * 2, 28);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `bold 14px ${fontBase}`;
+      ctx.textBaseline = 'middle';
+      ctx.fillText(threadTitle, PADDING + 10, y + 14);
+      y += 34;
+ 
+      // 레스 목록
+      posts.forEach((p, i) => {
+        const postX = PADDING;
+        const postW = WIDTH - PADDING * 2;
+ 
+        // 헤더
+        ctx.fillStyle = HEADER_BG;
+        ctx.fillRect(postX, y, postW, 22);
+        ctx.strokeStyle = BORDER;
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(postX, y, postW, 22);
+ 
+        ctx.textBaseline = 'middle';
+        let hx = postX + 8;
+ 
+        ctx.fillStyle = RED;
+        ctx.font = `bold 11px ${fontBase}`;
+        ctx.fillText(String(i + 1), hx, y + 11);
+        hx += ctx.measureText(String(i + 1)).width + 4;
+ 
+        ctx.fillStyle = GRAY;
+        ctx.font = `11px ${fontBase}`;
+        ctx.fillText('：', hx, y + 11);
+        hx += ctx.measureText('：').width;
+ 
+        ctx.fillStyle = BLUE;
+        ctx.font = `bold 11px ${fontBase}`;
+        ctx.fillText(p.name || '', hx, y + 11);
+        hx += ctx.measureText(p.name || '').width;
+ 
+        if (p.date) {
+          ctx.fillStyle = GRAY;
+          ctx.font = `11px ${fontBase}`;
+          ctx.fillText('：' + p.date, hx, y + 11);
+        }
+        y += 22;
+ 
+        // 본문
+        const lines = wrapText(ctx, p.content, postW - 24, 13);
+        const bodyH = lines.length * 22 + 14;
+        ctx.fillStyle = POST_BG;
+        ctx.fillRect(postX, y, postW, bodyH);
+        ctx.strokeStyle = BORDER;
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(postX, y, postW, bodyH);
+ 
+        ctx.fillStyle = '#222222';
+        ctx.font = `13px ${monoBase}`;
+        ctx.textBaseline = 'top';
+        lines.forEach((line, li) => {
+          ctx.fillText(line, postX + 12, y + 7 + li * 22);
+        });
+        y += bodyH + 6;
+      });
+ 
+      const dataUrl = canvas.toDataURL('image/png');
+ 
+      if (isMobile) {
+        const win = window.open('', '_blank');
+        win.document.write(
+          '<html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + title +
+          '</title><style>body{margin:0;background:#111;display:flex;flex-direction:column;align-items:center;padding:16px}' +
+          'img{max-width:100%;height:auto;border-radius:4px}p{color:#fff;font-size:13px;margin:0 0 12px;font-family:sans-serif;text-align:center}</style></head>' +
+          '<body><p>이미지를 길게 눌러 저장하세요</p><img src="' + dataUrl + '"></body></html>'
+        );
+        win.document.close();
+      } else {
+        const a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = title + '.png';
+        a.click();
+      }
+ 
+      showToast('PNG 생성 완료!');
+    } catch(e) {
+      console.error(e);
+      showToast('PNG 생성에 실패했습니다');
+    }
+  }, 100);
 }
 
 function copyExport() {
