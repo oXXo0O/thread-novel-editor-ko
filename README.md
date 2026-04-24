@@ -2,7 +2,7 @@
 
 2ch 익명 게시판 스레드 형식의 소설을 편하게 작성하고 투고용으로 내보낼 수 있는 웹 에디터입니다.
 
-**→ [사이트 바로가기](https://oXXo0O.github.io/thread-maker-ko)**
+**→ [사이트 바로가기](https://oxxo0o.github.io/thread-novel-editor-ko/)**
 
 ---
 
