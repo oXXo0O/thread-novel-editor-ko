@@ -285,7 +285,7 @@ function renderEditor() {
   list.innerHTML = posts.map((p, i) => `
     <div class="post-item">
       <div class="post-header">
-        <span class="post-num">${i + 1}</span>
+        <span class="post-num">${getStartNum() + i}</span>
         <span class="post-name">${esc(p.name)}</span>
         ${p.date ? `<span>${esc(p.date)}</span>` : ''}
         <span class="post-header-actions">
@@ -323,7 +323,7 @@ function renderPreview() {
   list.innerHTML = posts.map((p, i) => `
     <div class="preview-post">
       <div class="preview-post-header">
-        <span class="pnum">${i + 1}</span>：<span class="pname">${esc(p.name)}</span>${p.date ? '：' + esc(p.date) : ''}
+        <span class="pnum">${getStartNum() + i}</span>：<span class="pname">${esc(p.name)}</span>${p.date ? '：' + esc(p.date) : ''}
       </div>
       <div class="preview-post-body">${esc(p.content)}</div>
     </div>
@@ -336,12 +336,13 @@ function renderExport() {
   let out = '';
   if (fmt === '2ch') {
     out = title + '\n\n' + posts.map((p, i) => {
-      const header = p.date ? `${i + 1} ：${p.name} ：${p.date}` : `${i + 1} ：${p.name}`;
+      const start = getStartNum();
+      const header = p.date ? `${start + i} ：${p.name} ：${p.date}` : `${start + i} ：${p.name}`;
       return `${header}\n${p.content}`;
     }).join('\n\n');
   } else {
     out = title + '\n' + '─'.repeat(40) + '\n\n' + posts.map((p, i) => {
-      const header = p.date ? `[${i + 1}] ${p.name} ${p.date}` : `[${i + 1}] ${p.name}`;
+      const header = p.date ? `[${getStartNum() + i}] ${p.name} ${p.date}` : `[${getStartNum() + i}] ${p.name}`;
       return `${header}\n${p.content}`;
     }).join('\n\n');
   }
@@ -465,6 +466,7 @@ function exportPng() {
  
         ctx.fillStyle = RED;
         ctx.font = `bold 11px ${fontBase}`;
+        const postNum = String(getStartNum() + i);
         ctx.fillText(String(i + 1), hx, y + 11);
         hx += ctx.measureText(String(i + 1)).width + 4;
  
@@ -579,12 +581,19 @@ function importFile(input) {
   input.value = '';
 }
 
+// 시작 번호
+
+function getStartNum() {
+  return parseInt(document.getElementById('startNum')?.value || '1', 10) || 1;
+}
+
 // ── 로컬 저장 ─────────────────────────────────────────────────
 function collectState() {
   return {
     posts, nicks,
     title: document.getElementById('threadTitle').value,
     defaultName: document.getElementById('defaultName').value,
+    startNum: document.getElementById('startNum').value,
     dateMode: document.querySelector('input[name="dateMode"]:checked').value,
     dateFormat: document.getElementById('dateFormat').value,
     dateFixed: document.getElementById('dateFixed').value,
@@ -596,6 +605,7 @@ function applyState(data) {
   nicks = data.nicks || [];
   if (data.title !== undefined) document.getElementById('threadTitle').value = data.title;
   if (data.defaultName !== undefined) document.getElementById('defaultName').value = data.defaultName;
+    if (data.startNum !== undefined) document.getElementById('startNum').value = data.startNum;
   if (data.dateMode) {
     const radio = document.querySelector(`input[name="dateMode"][value="${data.dateMode}"]`);
     if (radio) { radio.checked = true; onDateModeChange(); }

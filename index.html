@@ -30,6 +30,10 @@
       <label>기본 닉네임</label>
       <input id="defaultName" value="" oninput="saveLocal()">
     </div>
+    <div>
+      <label>시작 번호</label>
+        <input id="startNum" type="number" value="1" min="1" oninput="saveLocal();renderEditor()" style="width:80px;">
+    </div>
     <div style="grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding-top:8px;border-top:1px solid var(--border);">
       <label style="font-size:11px;color:var(--text2);font-weight:500;margin:0;">날짜</label>
       <div id="dateModeRow" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;flex:1;">
