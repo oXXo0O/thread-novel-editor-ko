@@ -5,13 +5,116 @@ let editingPostId = null;
 let editingNickId = null;
 
 // ── 초기화 ────────────────────────────────────────────────────
+ 
+// ── 기호 팔레트 ──────────────────────────────────────────────
+const SYMBOL_GROUPS = [
+  { label: '괄호',   symbols: ['【】', '〔〕', '《》', '〈〉', '「」', '『』', '［］', '（）'] },
+  { label: '구분',   symbols: ['━', '─', '―', '·', '…', '※', '◆', '■', '▼', '▲', '★', '☆'] },
+  { label: '숫자',   symbols: ['①②③', '❶❷❸', 'Ⅰ Ⅱ Ⅲ'] },
+  { label: '기타',   symbols: ['♪', '♡', '♥', '✦', '✧', '〃', '々', '〜', '∥', '／', '＼'] },
+];
+ 
+let customSymbols = [];
+let paletteOpen = true;
+let lastFocused = null; // 마지막으로 포커스된 입력란
+ 
+// 포커스 추적
+function trackFocus(el) { lastFocused = el; }
+ 
+function initPalette() {
+  // 저장된 커스텀 기호 불러오기
+  try {
+    const saved = localStorage.getItem('thread-custom-symbols');
+    if (saved) customSymbols = JSON.parse(saved);
+  } catch(e) {}
+ 
+  // 모든 입력란에 포커스 추적 추가
+  ['newName','newDate','newContent'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('focus', () => trackFocus(el));
+  });
+ 
+  // 팔레트 상태 복원
+  try {
+    const state = localStorage.getItem('thread-palette-open');
+    if (state === 'false') { paletteOpen = false; document.getElementById('symbolPalette').classList.add('closed'); }
+  } catch(e) {}
+ 
+  renderPalette();
+}
+ 
+function togglePalette() {
+  paletteOpen = !paletteOpen;
+  document.getElementById('symbolPalette').classList.toggle('closed', !paletteOpen);
+  try { localStorage.setItem('thread-palette-open', paletteOpen); } catch(e) {}
+}
+ 
+function insertSymbol(sym) {
+  // 포커스된 입력란이 없으면 기본적으로 내용 textarea에 삽입
+  const target = lastFocused || document.getElementById('newContent');
+  const start = target.selectionStart ?? target.value.length;
+  const end = target.selectionEnd ?? target.value.length;
+  target.value = target.value.slice(0, start) + sym + target.value.slice(end);
+  const pos = start + sym.length;
+  target.setSelectionRange(pos, pos);
+  target.focus();
+  // 글자수 업데이트
+  if (target.id === 'newContent') updateCharCount();
+}
+ 
+function addCustomSymbol() {
+  const input = document.getElementById('customSymbol');
+  const sym = input.value.trim();
+  if (!sym) return;
+  if (customSymbols.includes(sym)) { showToast('이미 추가된 기호예요'); return; }
+  customSymbols.push(sym);
+  input.value = '';
+  try { localStorage.setItem('thread-custom-symbols', JSON.stringify(customSymbols)); } catch(e) {}
+  renderPalette();
+}
+ 
+function deleteCustomSymbol(sym) {
+  customSymbols = customSymbols.filter(s => s !== sym);
+  try { localStorage.setItem('thread-custom-symbols', JSON.stringify(customSymbols)); } catch(e) {}
+  renderPalette();
+}
+ 
+function renderPalette() {
+  const container = document.getElementById('symbolGroups');
+  let html = SYMBOL_GROUPS.map(g => `
+    <div class="symbol-group">
+      <span class="symbol-group-label">${g.label}</span>
+      <div class="symbol-group-btns">
+        ${g.symbols.map(s =>
+          `<button class="sym-btn" onclick="insertSymbol('${s.replace(/'/g, "\'")}')">${s}</button>`
+        ).join('')}
+      </div>
+    </div>
+  `).join('');
+ 
+  if (customSymbols.length) {
+    html += `<div class="symbol-group">
+      <span class="symbol-group-label">커스텀</span>
+      <div class="symbol-group-btns">
+        ${customSymbols.map(s =>
+          `<button class="sym-btn custom" onclick="insertSymbol('${s.replace(/'/g, "\'")}')">
+            ${esc(s)}<span class="sym-del" onclick="event.stopPropagation();deleteCustomSymbol('${s.replace(/'/g, "\'")}')">×</span>
+          </button>`
+        ).join('')}
+      </div>
+    </div>`;
+  }
+  container.innerHTML = html;
+}
+ 
 document.addEventListener('DOMContentLoaded', () => {
   loadLocal();
-
+  initPalette();
+ 
   document.getElementById('newContent').addEventListener('keydown', e => {
     if (e.key === 'Enter' && e.ctrlKey) { e.preventDefault(); addPost(); }
   });
-
+ 
   document.addEventListener('keydown', e => {
     if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
       e.preventDefault(); saveLocal(); showToast('저장되었습니다');
@@ -33,7 +136,7 @@ function getDefaultDate() {
   if (mode === 'fixed') return document.getElementById('dateFixed').value.trim();
   const fmt = document.getElementById('dateFormat').value;
   const now = new Date();
-  const days = ['日', '月', '火', '水', '木', '金', '土'];
+  const days = ['일', '월', '화', '수', '목', '금', '토'];
   const pad = n => String(n).padStart(2, '0');
   if (fmt === '2ch') {
     return `${now.getFullYear()}/${pad(now.getMonth() + 1)}/${pad(now.getDate())}(${days[now.getDay()]}) ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;

@@ -82,6 +82,22 @@
 
   <!-- 편집 -->
   <div id="panel-editor" class="panel active">
+
+    <!-- 기호 팔레트 -->
+    <div class="symbol-palette" id="symbolPalette">
+      <div class="symbol-palette-header" onclick="togglePalette()">
+        <span>🔣 특수기호</span>
+        <span class="symbol-toggle-icon" id="symbolToggleIcon">▲</span>
+      </div>
+      <div class="symbol-palette-body" id="symbolPaletteBody">
+        <div class="symbol-groups" id="symbolGroups"></div>
+        <div class="symbol-custom-row">
+          <input id="customSymbol" placeholder="직접 추가할 기호 입력" maxlength="10">
+          <button onclick="addCustomSymbol()" class="primary">추가</button>
+        </div>
+      </div>
+    </div>
+
     <div class="post-form">
       <div class="nick-hint" id="nickHint"></div>
       <div class="post-form-row">

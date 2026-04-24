@@ -291,3 +291,58 @@ button.header-btn.danger-h:hover { background: rgba(200,0,0,0.2); }
 @media (max-width: 600px) {
   input:not([type=radio]):not([type=checkbox]), select, textarea { font-size: 16px !important; }
 }
+
+/* ── 기호 팔레트 ── */
+.symbol-palette {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); margin-bottom: 10px; overflow: hidden;
+}
+.symbol-palette-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 12px; cursor: pointer; user-select: none;
+  font-size: 12px; font-weight: 500; color: var(--text2);
+  transition: background 0.1s;
+}
+.symbol-palette-header:hover { background: var(--bg3); }
+.symbol-toggle-icon { font-size: 10px; color: var(--text3); transition: transform 0.2s; }
+.symbol-palette.closed .symbol-toggle-icon { transform: rotate(180deg); }
+.symbol-palette-body { padding: 8px 10px 10px; border-top: 1px solid var(--border); }
+.symbol-palette.closed .symbol-palette-body { display: none; }
+ 
+.symbol-groups { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.symbol-group { display: flex; align-items: flex-start; gap: 6px; }
+.symbol-group-label {
+  font-size: 10px; color: var(--text3); min-width: 44px;
+  padding-top: 4px; flex-shrink: 0; font-weight: 500;
+}
+.symbol-group-btns { display: flex; flex-wrap: wrap; gap: 3px; }
+.sym-btn {
+  font-size: 13px; padding: 3px 7px; border-radius: 4px;
+  border: 1px solid var(--border); background: #fff;
+  color: var(--text); cursor: pointer; font-family: var(--mono);
+  transition: background 0.1s, border-color 0.1s; line-height: 1.4;
+}
+.sym-btn:hover { background: var(--bg3); border-color: var(--accent); }
+.sym-btn.custom { color: var(--accent); border-color: var(--accent); background: #f0f4ff; position: relative; }
+.sym-btn.custom .sym-del {
+  display: none; position: absolute; top: -5px; right: -5px;
+  background: var(--danger); color: #fff; border-radius: 50%;
+  width: 14px; height: 14px; font-size: 9px; line-height: 14px;
+  text-align: center; cursor: pointer;
+}
+.sym-btn.custom:hover .sym-del { display: block; }
+ 
+.symbol-custom-row { display: flex; gap: 6px; }
+.symbol-custom-row input {
+  flex: 1; font-size: 13px; padding: 4px 8px;
+  border-radius: 4px; border: 1px solid var(--border);
+  background: #fff; color: var(--text); font-family: var(--mono);
+}
+.symbol-custom-row input:focus { outline: none; border-color: var(--accent); }
+.symbol-custom-row button { flex-shrink: 0; }
+ 
+@media (max-width: 600px) {
+  .symbol-group { flex-direction: column; gap: 3px; }
+  .symbol-group-label { padding-top: 0; }
+  .sym-btn { font-size: 15px; padding: 5px 9px; }
+}
