@@ -11,9 +11,9 @@
 <header class="site-header">
   <h1> 스레 형식 소설 에디터</h1>
   <div class="header-btns">
-    <button class="header-btn" onclick="exportFile()">📤<span class="btn-label"> 파일 저장</span></button>
-    <button class="header-btn" onclick="document.getElementById('importInput').click()">📥<span class="btn-label"> 파일 불러오기</span></button>
-    <button class="header-btn danger-h" onclick="clearAll()">🗑<span class="btn-label"> 전체 삭제</span></button>
+    <button class="header-btn" onclick="exportFile()" aria-label="파일 저장">📤<span class="btn-label" aria-hidden="true"> 파일 저장</span></button>
+    <button class="header-btn" onclick="document.getElementById('importInput').click()" aria-label="파일 불러오기">📥<span class="btn-label" aria-hidden="true"> 파일 불러오기</span></button>
+    <button class="header-btn danger-h" onclick="clearAll()" aria-label="전체 삭제">🗑<span class="btn-label" aria-hidden="true"> 전체 삭제</span></button>
     <input type="file" id="importInput" accept=".json" style="display:none" onchange="importFile(this)">
   </div>
 </header>
@@ -23,33 +23,34 @@
   <!-- 설정 -->
   <div class="settings-bar">
     <div>
-      <label>스레드 제목</label>
+      <label for="threadTitle">스레드 제목</label>
       <input id="threadTitle" value="【스레】 제목을 입력하세요" oninput="saveLocal()">
     </div>
     <div>
-      <label>기본 닉네임</label>
+      <label for="defaultName">기본 닉네임</label>
       <input id="defaultName" value="" oninput="saveLocal()">
     </div>
     <div>
-      <label>시작 번호</label>
+      <label for="startNum">시작 번호</label>
         <input id="startNum" type="number" value="1" min="1" oninput="saveLocal();renderEditor()" style="width:80px;">
     </div>
-    <!-- 1000 마감 멘트 설정 -->
+    <!-- [추가] 1000 마감 멘트 설정 -->
     <div style="grid-column:1/-1;padding-top:8px;border-top:1px solid var(--border);">
-      <div style="display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="toggleEndMsg()">
+      <div style="display:flex;align-items:center;gap:8px;cursor:pointer;" onclick="toggleEndMsg()" role="button" tabindex="0" aria-expanded="false" aria-controls="endMsgBody" onkeydown="if(event.key==='Enter'||event.key===' ')toggleEndMsg()">
         <label style="font-size:11px;color:var(--text2);font-weight:500;margin:0;cursor:pointer;">1000 마감 멘트</label>
         <label style="display:flex;align-items:center;gap:4px;cursor:pointer;margin:0;font-size:12px;color:var(--text2);white-space:nowrap;">
           <input type="checkbox" id="endMsgEnabled" onchange="saveLocal();renderEditor()" onclick="event.stopPropagation()" style="accent-color:var(--accent)"> 사용
         </label>
         <span id="endMsgToggleIcon" style="font-size:10px;color:var(--text3);margin-left:auto;">▼</span>
       </div>
+      <!-- [수정] display:none → visibility:hidden (display:none이면 input 값 못 읽음) -->
       <div id="endMsgBody" style="visibility:hidden;height:0;overflow:hidden;margin-top:0;">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
           <label style="font-size:11px;color:var(--text2);min-width:30px;font-weight:500;">이름</label>
-          <input id="endMsgName" type="text" placeholder="이름 (기본값: Over 1000)" oninput="saveLocal();renderEditor()"
+          <input id="endMsgName" aria-label="마감 멘트 이름" type="text" placeholder="이름 (기본값: Over 1000)" oninput="saveLocal();renderEditor()"
             style="flex:1;font-size:12px;padding:4px 8px;border-radius:4px;border:1px solid var(--border);background:#fff;color:var(--text);font-family:var(--font);">
         </div>
-        <textarea id="endMsgText" rows="2" oninput="saveLocal();renderEditor()"
+        <textarea id="endMsgText" rows="2" aria-label="마감 멘트 내용" oninput="saveLocal();renderEditor()"
           style="width:100%;font-size:12px;padding:6px 8px;border-radius:4px;border:1px solid var(--border);background:#fff;color:var(--text);font-family:var(--mono);resize:vertical;line-height:1.6;">이 스레드는 1000개를 넘었습니다.
 다음 스레드를 이용해 주세요.</textarea>
         <div style="font-size:11px;color:var(--text3);margin-top:3px;">※ 레스가 1000개를 넘으면 1001번에 자동으로 추가됩니다</div>
@@ -68,14 +69,14 @@
           <input type="radio" name="dateMode" value="fixed" onchange="onDateModeChange()" style="accent-color:var(--accent)"> 고정값
         </label>
         <span id="dateFormatWrap" style="display:flex;align-items:center;gap:5px;">
-          <select id="dateFormat" onchange="saveLocal()" style="font-size:12px;padding:3px 6px;border-radius:4px;border:1px solid var(--border);background:#fff;color:var(--text);font-family:var(--font);">
-            <option value="channel">스레 채널식 (YYYY/MM/DD(요일) HH:mm:ss)</option>
+          <select id="dateFormat" aria-label="날짜 형식 선택" onchange="saveLocal()" style="font-size:12px;padding:3px 6px;border-radius:4px;border:1px solid var(--border);background:#fff;color:var(--text);font-family:var(--font);">
+            <option value="2ch">2ch식 (YYYY/MM/DD(요일) HH:mm:ss)</option>
             <option value="short">단순 (YYYY-MM-DD HH:mm)</option>
             <option value="time">시간만 (HH:mm)</option>
           </select>
         </span>
         <span id="dateFixedWrap" style="display:none;align-items:center;gap:5px;">
-          <input id="dateFixed" type="text" placeholder="예) 20XX/XX/XX" oninput="saveLocal()"
+          <input id="dateFixed" aria-label="고정 날짜값" type="text" placeholder="예) 20XX/XX/XX" oninput="saveLocal()"
             style="font-size:12px;padding:4px 8px;border-radius:4px;border:1px solid var(--border);background:#fff;color:var(--text);font-family:var(--mono);width:220px;">
         </span>
       </div>
@@ -89,8 +90,8 @@
       <span>항목 클릭 시 이름 입력란에 자동 입력</span>
     </div>
     <div class="nick-add-row">
-      <input id="addNickName" placeholder="닉네임" onkeydown="if(event.key==='Enter')addNick()">
-      <input id="addNickMemo" class="memo" placeholder="메모 (역할, 설명 등)" onkeydown="if(event.key==='Enter')addNick()">
+      <input id="addNickName" placeholder="닉네임" aria-label="닉네임 입력" onkeydown="if(event.key==='Enter')addNick()">
+      <input id="addNickMemo" class="memo" placeholder="메모 (역할, 설명 등)" aria-label="닉네임 메모 입력" onkeydown="if(event.key==='Enter')addNick()">
       <button onclick="addNick()" class="primary">추가</button>
     </div>
     <div class="nick-list" id="nickList">
@@ -99,25 +100,25 @@
   </div>
 
   <!-- 탭 -->
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('editor', this)">편집</button>
-    <button class="tab" onclick="switchTab('preview', this)">미리보기</button>
-    <button class="tab" onclick="switchTab('export', this)">내보내기</button>
+  <div class="tabs" role="tablist">
+    <button class="tab active" onclick="switchTab('editor', this)" role="tab" aria-selected="true" aria-controls="panel-editor">편집</button>
+    <button class="tab" onclick="switchTab('preview', this)" role="tab" aria-selected="false" aria-controls="panel-preview">미리보기</button>
+    <button class="tab" onclick="switchTab('export', this)" role="tab" aria-selected="false" aria-controls="panel-export">내보내기</button>
   </div>
 
   <!-- 편집 -->
-  <div id="panel-editor" class="panel active">
+  <div id="panel-editor" class="panel active" role="tabpanel" aria-label="편집">
 
     <!-- 기호 팔레트 -->
     <div class="symbol-palette" id="symbolPalette">
-      <div class="symbol-palette-header" onclick="togglePalette()">
+      <div class="symbol-palette-header" onclick="togglePalette()" role="button" tabindex="0" aria-expanded="true" aria-controls="symbolPaletteBody" onkeydown="if(event.key==='Enter'||event.key===' ')togglePalette()">
         <span>특수기호</span>
         <span class="symbol-toggle-icon" id="symbolToggleIcon">▲</span>
       </div>
       <div class="symbol-palette-body" id="symbolPaletteBody">
         <div class="symbol-groups" id="symbolGroups"></div>
         <div class="symbol-custom-row">
-          <input id="customSymbol" placeholder="직접 추가할 기호 입력" maxlength="10">
+          <input id="customSymbol" placeholder="직접 추가할 기호 입력" maxlength="10" aria-label="커스텀 기호 입력">
           <button onclick="addCustomSymbol()" class="primary">추가</button>
         </div>
       </div>
@@ -126,12 +127,12 @@
     <div class="post-form">
       <div class="nick-hint" id="nickHint"></div>
       <div class="post-form-row">
-        <label>이름</label>
+        <label for="newName">이름</label>
         <input id="newName" placeholder="이름 (비워두면 기본값)" style="max-width:210px">
-        <label style="min-width:30px">날짜</label>
+        <label for="newDate" style="min-width:30px">날짜</label>
         <input id="newDate" placeholder="날짜 (비워두면 설정값)" style="max-width:210px">
       </div>
-      <textarea id="newContent" placeholder="레스 내용을 입력하세요... (Ctrl+Enter로 추가)" oninput="updateCharCount()"></textarea>
+      <textarea id="newContent" aria-label="레스 내용" placeholder="레스 내용을 입력하세요... (Ctrl+Enter로 추가)" oninput="updateCharCount()"></textarea>
       <div class="post-form-footer">
         <span class="char-count" id="charCount">0자</span>
         <button onclick="addPost()" class="primary">레스 추가 ↵</button>
@@ -141,7 +142,7 @@
   </div>
 
   <!-- 미리보기 -->
-  <div id="panel-preview" class="panel">
+  <div id="panel-preview" class="panel" role="tabpanel" aria-label="미리보기">
     <div class="preview-board">
       <div class="preview-title" id="previewTitle"></div>
       <div id="previewList"></div>
@@ -149,19 +150,19 @@
   </div>
 
   <!-- 내보내기 -->
-  <div id="panel-export" class="panel">
+  <div id="panel-export" class="panel" role="tabpanel" aria-label="내보내기">
     <div class="export-options">
-      <label><input type="radio" name="fmt" value="channel" checked onchange="renderExport()"> 스레 채널 스타일</label>
+      <label><input type="radio" name="fmt" value="2ch" checked onchange="renderExport()"> 2ch 스타일</label>
       <label><input type="radio" name="fmt" value="plain" onchange="renderExport()"> 일반 텍스트</label>
       <button onclick="copyExport()" class="accent" style="margin-left:auto">복사</button>
       <button onclick="exportPng()" class="primary">PNG 저장</button>
     </div>
-    <textarea class="export-output" id="exportOutput" readonly></textarea>
+    <textarea class="export-output" id="exportOutput" readonly aria-label="내보내기 결과"></textarea>
   </div>
 
 </main>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <script src="script.js"></script>
 </body>
