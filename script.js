@@ -46,6 +46,7 @@ function initPalette() {
 function togglePalette() {
   paletteOpen = !paletteOpen;
   document.getElementById('symbolPalette').classList.toggle('closed', !paletteOpen);
+  document.querySelector('.symbol-palette-header').setAttribute('aria-expanded', paletteOpen);
   try { localStorage.setItem('thread-palette-open', paletteOpen); } catch(e) {}
 }
  
@@ -138,7 +139,7 @@ function getDefaultDate() {
   const now = new Date();
   const days = ['일', '월', '화', '수', '목', '금', '토'];
   const pad = n => String(n).padStart(2, '0');
-  if (fmt === 'channel') {
+  if (fmt === '2ch') {
     return `${now.getFullYear()}/${pad(now.getMonth() + 1)}/${pad(now.getDate())}(${days[now.getDay()]}) ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
   } else if (fmt === 'short') {
     return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
@@ -345,7 +346,7 @@ function renderPreview() {
     </div>
   `).join('');
 
-  // 미리보기 1000 마감 멘트
+  // [추가] 미리보기 1000 마감 멘트
   const pvStartNum = getStartNum();
   const pvEndMsg = getEndMsg();
   if (pvEndMsg !== null && (pvStartNum + posts.length - 1) >= 1000) {
@@ -361,27 +362,27 @@ function renderPreview() {
 }
 
 function renderExport() {
-  const fmt = document.querySelector('input[name="fmt"]:checked')?.value || 'channel';
+  const fmt = document.querySelector('input[name="fmt"]:checked')?.value || '2ch';
   const title = document.getElementById('threadTitle').value;
   let out = '';
   const expStartNum = getStartNum();
   const expEndMsg = getEndMsg();
   const showExpEnd = expEndMsg !== null && (expStartNum + posts.length - 1) >= 1000;
   const expEndNum = expStartNum + posts.length;
- 
-  if (fmt === 'channel') {
+
+  if (fmt === '2ch') {
     out = title + '\n\n' + posts.map((p, i) => {
       const header = p.date ? `${expStartNum + i} ：${p.name} ：${p.date}` : `${expStartNum + i} ：${p.name}`;
       return `${header}\n${p.content}`;
     }).join('\n\n');
-    // 내보내기 1000 마감 멘트
+    // [추가] 내보내기 1000 마감 멘트
     if (showExpEnd) out += `\n\n${expEndNum} ：${expEndMsg.name}\n${expEndMsg.text}`;
   } else {
     out = title + '\n' + '─'.repeat(40) + '\n\n' + posts.map((p, i) => {
       const header = p.date ? `[${expStartNum + i}] ${p.name} ${p.date}` : `[${expStartNum + i}] ${p.name}`;
       return `${header}\n${p.content}`;
     }).join('\n\n');
-    // 내보내기 1000 마감 멘트
+    // [추가] 내보내기 1000 마감 멘트
     if (showExpEnd) out += `\n\n[${expEndNum}] ${expEndMsg.name}\n${expEndMsg.text}`;
   }
   document.getElementById('exportOutput').value = out;
@@ -578,9 +579,13 @@ function copyExport() {
 }
 
 function switchTab(name, btn) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.remove('active');
+    t.setAttribute('aria-selected', 'false');
+  });
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   btn.classList.add('active');
+  btn.setAttribute('aria-selected', 'true');
   document.getElementById('panel-' + name).classList.add('active');
   if (name === 'preview') renderPreview();
   if (name === 'export') renderExport();
@@ -620,21 +625,25 @@ function importFile(input) {
 }
 
 // 1000 마감 멘트 토글
+// [수정] toggleEndMsg - display:none → visibility 방식으로 변경 (값 읽기 문제 해결)
 function toggleEndMsg() {
   const body = document.getElementById('endMsgBody');
   const icon = document.getElementById('endMsgToggleIcon');
   const isHidden = body.style.visibility === 'hidden';
+  const toggleBtn = document.querySelector('[aria-controls="endMsgBody"]');
   if (isHidden) {
     body.style.visibility = 'visible';
     body.style.height = 'auto';
     body.style.marginTop = '8px';
     icon.textContent = '▲';
+    if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'true');
   } else {
     body.style.visibility = 'hidden';
     body.style.height = '0';
     body.style.overflow = 'hidden';
     body.style.marginTop = '0';
     icon.textContent = '▼';
+    if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'false');
   }
 }
  
